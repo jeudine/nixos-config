@@ -1,5 +1,4 @@
-{ config, pkgs, ... }:
-
+{ config, pkgs, lib, inputs, ... }:
 {
   imports = [ ./hardware-configuration.nix ];
 
@@ -32,7 +31,16 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [ git vim htop ];
+  # Flake
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Claude
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [ "claude" ];
+
+  environment.systemPackages = with pkgs; [ git vim htop ]
+    ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
+
 
   system.stateVersion = "26.05";
 }
