@@ -15,6 +15,7 @@ Flake-based NixOS configuration for a single headless machine: the host `server`
 ## What the system provides
 
 - **Boot**: systemd-boot on UEFI.
+- **Storage**: ZFS, with the `tank` pool imported at boot and monthly scrubbing. See [Storage (ZFS)](#storage-zfs).
 - **Host**: `server`, timezone `Europe/Zurich`, `x86_64-linux`.
 - **User**: `julien`, normal user in the `wheel` group (sudo). No password is set here — set one with `passwd` or add `users.users.julien.openssh.authorizedKeys.keys`.
 - **SSH**: `openssh` enabled with password authentication disabled, so key-based login only.
@@ -47,6 +48,37 @@ Build only, to check that it evaluates:
 
 ```bash
 nixos-rebuild build --flake .#server
+```
+
+## Storage (ZFS)
+
+ZFS is enabled via `boot.supportedFilesystems`. Three things follow from that:
+
+- **`networking.hostId`** is mandatory for ZFS — it is stamped into the pool
+  labels so ZFS can tell whether a pool is being imported by two machines at
+  once. Do not change it casually: the next boot will see `tank` as last used
+  by a different host and the import will fail until you run
+  `zpool import -f tank`.
+- **`boot.zfs.extraPools = [ "tank" ]`** imports `tank` at boot. Pools that back
+  entries in `hardware-configuration.nix` are imported automatically and need no
+  listing here; `tank` needs it, because nothing mounts from it at boot.
+- **Scrubbing and TRIM** run on timers. `services.zfs.autoScrub` is enabled,
+  which scrubs monthly plus a randomized delay of up to 6h. Periodic TRIM is on
+  by default in NixOS whenever ZFS is enabled, and runs weekly.
+
+Check pool health and the timers:
+
+```bash
+zpool status tank
+zpool list
+systemctl list-timers 'zfs-*'
+```
+
+Scrub by hand and watch it progress:
+
+```bash
+sudo zpool scrub tank
+zpool status tank
 ```
 
 ## Updating
