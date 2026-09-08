@@ -5,6 +5,12 @@
   # Bootloader (UEFI)
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # ZFS
+  boot.supportedFilesystems = [ "zfs" ];
+  networking.hostId = "a637bea8";
+  boot.zfs.extraPools = [ "tank" ];
+  services.zfs.autoScrub.enable = true;
   
   # Hostname and time
   networking.hostName = "server";
