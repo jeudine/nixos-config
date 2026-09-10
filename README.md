@@ -15,7 +15,7 @@ Flake-based NixOS configuration for a single headless machine: the host `server`
 ## What the system provides
 
 - **Boot**: systemd-boot on UEFI.
-- **Storage**: ZFS, with the `tank` pool imported at boot and monthly scrubbing. See [Storage (ZFS)](#storage-zfs).
+- **Storage**: btrfs, a `tank` filesystem with `data` and `workspace` subvolumes, scrubbed monthly. See [Storage (btrfs)](#storage-btrfs).
 - **Host**: `server`, timezone `Europe/Zurich`, `x86_64-linux`.
 - **User**: `julien`, normal user in the `wheel` group (sudo). No password is set here — set one with `passwd` or add `users.users.julien.openssh.authorizedKeys.keys`.
 - **SSH**: `openssh` enabled with password authentication disabled, so key-based login only.
@@ -50,36 +50,42 @@ Build only, to check that it evaluates:
 nixos-rebuild build --flake .#server
 ```
 
-## Storage (ZFS)
+## Storage (btrfs)
 
-ZFS is enabled via `boot.supportedFilesystems`. Three things follow from that:
+`configuration.nix` mounts two subvolumes from the btrfs filesystem labelled
+`tank`: `data` at `/data` and `workspace` at `/workspace`. Both sit at the top
+level of the filesystem, not inside each other.
 
-- **`networking.hostId`** is mandatory for ZFS — it is stamped into the pool
-  labels so ZFS can tell whether a pool is being imported by two machines at
-  once. Do not change it casually: the next boot will see `tank` as last used
-  by a different host and the import will fail until you run
-  `zpool import -f tank`.
-- **`boot.zfs.extraPools = [ "tank" ]`** imports `tank` at boot. Pools that back
-  entries in `hardware-configuration.nix` are imported automatically and need no
-  listing here; `tank` needs it, because nothing mounts from it at boot.
-- **Scrubbing and TRIM** run on timers. `services.zfs.autoScrub` is enabled,
-  which scrubs monthly plus a randomized delay of up to 6h. Periodic TRIM is on
-  by default in NixOS whenever ZFS is enabled, and runs weekly.
-
-Check pool health and the timers:
+To create them, first find the partition to use. **Everything on it will be
+erased.**
 
 ```bash
-zpool status tank
-zpool list
-systemctl list-timers 'zfs-*'
+lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT
 ```
 
-Scrub by hand and watch it progress:
+Then, replacing `/dev/sdX1` with that partition (e.g. `/dev/sdb1`,
+`/dev/nvme0n1p3`):
 
 ```bash
-sudo zpool scrub tank
-zpool status tank
+nix shell nixpkgs#btrfs-progs    # btrfs tools aren't installed until the first rebuild
+sudo mkfs.btrfs -L tank /dev/sdX1
+sudo mkdir -p /mnt
+sudo mount /dev/disk/by-label/tank /mnt
+sudo btrfs subvolume create /mnt/data
+sudo btrfs subvolume create /mnt/workspace
+sudo umount /mnt
+sudo nixos-rebuild switch --flake .#server
 ```
+
+`mkfs.btrfs` refuses to overwrite a partition that already holds a filesystem.
+If it does, and you are sure the data can go, clear it with
+`sudo wipefs -a /dev/sdX1` and run `mkfs.btrfs` again.
+
+The partition only appears in the `mkfs.btrfs` step: after that everything
+goes through the `tank` label, which is also what `configuration.nix` mounts.
+No other change to the config is needed. The label and the subvolume names
+must match the `fileSystems` entries there, and the mount points are created
+automatically.
 
 ## Updating
 
