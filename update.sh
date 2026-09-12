@@ -24,10 +24,10 @@ if git diff --quiet flake.lock; then
 fi
 
 echo "==> Rebuilding $HOST"
-sudo nixos-rebuild switch --flake ".#$HOST"
+sudo nixos-rebuild switch --flake ".#$HOST" --impure
 
 echo "==> Committing flake.lock"
 git add flake.lock
 git commit -m "Update flake inputs: ${*:-all}"
 
-echo "==> Done. Roll back with: git revert HEAD && sudo nixos-rebuild switch --flake .#$HOST"
+echo "==> Done. Roll back with: git revert HEAD && sudo nixos-rebuild switch --flake .#$HOST --impure"

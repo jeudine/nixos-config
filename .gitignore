@@ -1,0 +1,2 @@
+# Private NFS client list; see nfs-clients.example.nix
+nfs-clients.nix
