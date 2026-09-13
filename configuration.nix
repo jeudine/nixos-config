@@ -87,8 +87,14 @@ in
 
   users.users.julien = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "plugdev" ];
   };
+
+  # Debug probes (STLink etc.) for probe-rs. Its udev rules give the device to
+  # group plugdev; the uaccess tag alone only covers local seat logins, not SSH.
+  # NixOS does not create plugdev, so it is declared here.
+  users.groups.plugdev = { };
+  services.udev.packages = [ pkgs.probe-rs-tools ];
 
   # SSH
   services.openssh = {
@@ -115,7 +121,8 @@ in
 
   # Rust. rust-overlay provides pkgs.rust-bin, pinned through flake.lock, so the
   # toolchain moves only when ./update.sh updates the input. cargo needs a C
-  # linker (cc), hence gcc.
+  # linker (cc), hence gcc. The thumbv7em-none-eabihf target and probe-rs /
+  # flip-link are for STM32 firmware (Cortex-M4F).
   nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
 
   # Put ~/.local/bin on PATH.
@@ -126,9 +133,13 @@ in
     vim
     htop
     gcc
+    python3
     (rust-bin.stable.latest.default.override {
       extensions = [ "rust-src" "rust-analyzer" ];
+      targets = [ "thumbv7em-none-eabihf" ];
     })
+    probe-rs-tools
+    flip-link
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
