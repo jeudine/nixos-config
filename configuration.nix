@@ -113,7 +113,20 @@ in
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "claude" ];
 
-  environment.systemPackages = with pkgs; [ git vim htop ]
+  # Rust. rust-overlay provides pkgs.rust-bin, pinned through flake.lock, so the
+  # toolchain moves only when ./update.sh updates the input. cargo needs a C
+  # linker (cc), hence gcc.
+  nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
+
+  environment.systemPackages = with pkgs; [
+    git
+    vim
+    htop
+    gcc
+    (rust-bin.stable.latest.default.override {
+      extensions = [ "rust-src" "rust-analyzer" ];
+    })
+  ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
 
