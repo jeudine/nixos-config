@@ -118,6 +118,9 @@ in
   # linker (cc), hence gcc.
   nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
 
+  # Put ~/.local/bin on PATH.
+  environment.localBinInPath = true;
+
   environment.systemPackages = with pkgs; [
     git
     vim
