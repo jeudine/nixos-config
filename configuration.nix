@@ -87,7 +87,7 @@ in
 
   users.users.julien = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "plugdev" ];
+    extraGroups = [ "wheel" "plugdev" "dialout" ];
   };
 
   # Debug probes (STLink etc.) for probe-rs. Its udev rules give the device to
@@ -121,8 +121,8 @@ in
 
   # Rust. rust-overlay provides pkgs.rust-bin, pinned through flake.lock, so the
   # toolchain moves only when ./update.sh updates the input. cargo needs a C
-  # linker (cc), hence gcc. The thumbv7em-none-eabihf target and probe-rs /
-  # flip-link are for STM32 firmware (Cortex-M4F).
+  # linker (cc), hence gcc. The thumbv7em-none-eabihf target, probe-rs,
+  # flip-link and stm32flash are for STM32 firmware (Cortex-M4F).
   nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
 
   # Put ~/.local/bin on PATH.
@@ -140,6 +140,7 @@ in
     })
     probe-rs-tools
     flip-link
+    stm32flash
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
