@@ -4,6 +4,11 @@
 git repository; `/workspace` itself is not. Agents are started from here and controlled
 remotely, so don't wait on interactive prompts and report clearly what you did.
 
+**At the start of every session**, look at all the repositories in `/workspace`: list the
+subdirectories and, for each one, check its README / CLAUDE.md, its remote (`git remote -v`),
+current branch and status (`git status`). Don't rely on a hardcoded project list; projects are
+added over time. Ignore `._*` AppleDouble files.
+
 Before working on a project, `cd` into it and read its own README / CLAUDE.md if present.
 
 ## Git rules (apply to every project)
@@ -33,12 +38,3 @@ If you need a tool that isn't installed:
 3. Give the command to apply it: `sudo nixos-rebuild switch --flake ~/nixos-config#server --impure`
 
 Don't edit `~/nixos-config` yourself unless asked. Continue with whatever work doesn't need the tool.
-
-## Projects
-
-| Directory | What | Remote |
-| --- | --- | --- |
-| `mseq/` | Rust MIDI sequencer framework (Cargo workspace) | `MF-Room/mseq` |
-| `mseq_pcb/` | KiCad 10 PCB for MSeq embedded (STM32F413) | `MF-Room/mseq_pcb` |
-
-Add a row when a new project is added.
