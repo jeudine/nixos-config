@@ -20,12 +20,11 @@ Flake-based NixOS configuration for a single headless machine: the host `server`
 - **Boot**: systemd-boot on UEFI.
 - **Storage**: btrfs, a `tank` filesystem with `data` and `workspace` subvolumes, scrubbed monthly. See [Storage (btrfs)](#storage-btrfs).
 - **Host**: `server`, timezone `Europe/Zurich`, `x86_64-linux`.
-- **User**: `julien`, normal user in the `wheel` group (sudo). No password is set here — set one with `passwd` or add `users.users.julien.openssh.authorizedKeys.keys`.
+- **User**: `julien`. No password is set here — set one with `passwd` or add `users.users.julien.openssh.authorizedKeys.keys`.
 - **NFS**: `/data` and `/workspace` exported over NFS v3 and v4 to the LAN, per the client list in `~/nixos-private/nfs-clients.nix`. See [NFS](#nfs).
 - **SSH**: `openssh` enabled with password authentication disabled, so key-based login only.
 - **mDNS**: `avahi` publishing addresses, so the box is reachable as `server.local`.
 - **Nix**: `nix-command` and `flakes` experimental features enabled.
-- **Packages**: `git`, `vim`, `htop`, `claude-code` (unfree, allowed via `allowUnfreePredicate`), and the stable Rust toolchain from rust-overlay (`rustc`, `cargo`, `clippy`, `rustfmt`, `rust-analyzer`, `rust-src`) with `gcc` as its linker.
 
 ## Usage
 
