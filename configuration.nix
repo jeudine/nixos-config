@@ -141,6 +141,8 @@ in
     probe-rs-tools
     flip-link
     stm32flash
+    librsvg
+    nodejs
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
