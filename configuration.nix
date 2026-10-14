@@ -143,8 +143,16 @@ in
     stm32flash
     librsvg
     nodejs
+    # Slide decks (/workspace/phd): marp builds them, chromium renders the PDF,
+    # poppler-utils (pdftoppm) turns pages into PNGs to check the layout.
+    marp-cli
+    chromium
+    poppler-utils
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
+
+  # marp-cli looks for a Chrome binary; point it at the Nix one explicitly.
+  environment.variables.CHROME_PATH = "${pkgs.chromium}/bin/chromium";
 
 
   system.stateVersion = "26.05";
