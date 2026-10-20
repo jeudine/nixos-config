@@ -148,6 +148,8 @@ in
     marp-cli
     chromium
     poppler-utils
+    # Markdown docs to PDF: pandoc converts to standalone HTML, chromium prints it.
+    pandoc
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
