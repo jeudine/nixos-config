@@ -34,7 +34,9 @@ If you need a tool that isn't installed:
 1. Tell me which tool and why.
 2. Give me the exact change to apply in `~/nixos-config/configuration.nix`, usually adding the
    nixpkgs attribute to `environment.systemPackages`, e.g.
-   `environment.systemPackages = with pkgs; [ git vim htop cargo rustc ]`
+   `environment.systemPackages = with pkgs; [ git vim htop cargo rustc ]`.
+   Add only the attribute name: no comment saying what the package is for or which project
+   needs it.
 3. Give the command to apply it: `sudo nixos-rebuild switch --flake ~/nixos-config#server --impure`
 
 Don't edit `~/nixos-config` yourself unless asked. Continue with whatever work doesn't need the tool.

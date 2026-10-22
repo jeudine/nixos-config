@@ -120,9 +120,7 @@ in
     builtins.elem (lib.getName pkg) [ "claude" ];
 
   # Rust. rust-overlay provides pkgs.rust-bin, pinned through flake.lock, so the
-  # toolchain moves only when ./update.sh updates the input. cargo needs a C
-  # linker (cc), hence gcc. The thumbv7em-none-eabihf target, probe-rs,
-  # flip-link and stm32flash are for STM32 firmware (Cortex-M4F).
+  # toolchain moves only when ./update.sh updates the input.
   nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
 
   # Put ~/.local/bin on PATH.
@@ -143,13 +141,11 @@ in
     stm32flash
     librsvg
     nodejs
-    # Slide decks (/workspace/phd): marp builds them, chromium renders the PDF,
-    # poppler-utils (pdftoppm) turns pages into PNGs to check the layout.
     marp-cli
     chromium
     poppler-utils
-    # Markdown docs to PDF: pandoc converts to standalone HTML, chromium prints it.
     pandoc
+    gnumake
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
