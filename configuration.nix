@@ -146,12 +146,16 @@ in
     poppler-utils
     pandoc
     gnumake
+    pkg-config
+    alsa-lib
   ]
     ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
 
   # marp-cli looks for a Chrome binary; point it at the Nix one explicitly.
   environment.variables.CHROME_PATH = "${pkgs.chromium}/bin/chromium";
 
+  # pkg-config only searches the paths listed here; system packages are not added to it.
+  environment.variables.PKG_CONFIG_PATH = "${pkgs.alsa-lib.dev}/lib/pkgconfig";
 
   system.stateVersion = "26.05";
 }
