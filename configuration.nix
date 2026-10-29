@@ -149,7 +149,10 @@ in
     pkg-config
     alsa-lib
   ]
-    ++ [ inputs.claude-code.packages.${pkgs.system}.default ];
+    ++ [
+      inputs.claude-code.packages.${pkgs.system}.default
+      inputs.codex-cli.packages.${pkgs.system}.default
+    ];
 
   # marp-cli looks for a Chrome binary; point it at the Nix one explicitly.
   environment.variables.CHROME_PATH = "${pkgs.chromium}/bin/chromium";
