@@ -26,6 +26,8 @@ in
 
   # Bootloader (UEFI)
   boot.loader.systemd-boot.enable = true;
+  # /boot is only 512M and each kernel+initrd is ~56M; keep it from filling up.
+  boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Storage (btrfs)
