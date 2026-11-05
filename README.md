@@ -222,6 +222,15 @@ The script derives the flake attribute from `hostname`; override it with
 `HOST_OVERRIDE=server ./update.sh` if the machine's hostname ever differs from
 the `nixosConfigurations` name.
 
+Once it has finished, the script checks how full `/` is. At 85% or more, it
+deletes every system generation except the newest 5, the same number the
+systemd-boot menu keeps, and then collects garbage from the Nix store. Both
+numbers can be overridden:
+
+```bash
+DISK_THRESHOLD=90 KEEP_GENERATIONS=3 ./update.sh
+```
+
 To roll back an update:
 
 ```bash
