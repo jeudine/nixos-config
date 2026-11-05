@@ -147,6 +147,7 @@ in
     chromium
     poppler-utils
     pandoc
+    texliveFull
     gnumake
     pkg-config
     alsa-lib
