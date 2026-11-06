@@ -104,6 +104,16 @@ in
     settings.PasswordAuthentication = false;
   };
 
+  # Tailscale. SSH and NFS need nothing extra: port 22 and the NFS ports above
+  # are open on every interface, tailscale0 included. NFS still authorises by
+  # source address, so a client mounting over the tailnet must be listed in
+  # nfs-clients.nix by its 100.x address. openFirewall opens UDP 41641 so peers
+  # can connect directly rather than through a DERP relay.
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # mDNS
   services.avahi = {
     enable = true;

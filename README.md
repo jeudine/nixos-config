@@ -23,6 +23,7 @@ Flake-based NixOS configuration for a single headless machine: the host `server`
 - **User**: `julien`. No password is set here — set one with `passwd` or add `users.users.julien.openssh.authorizedKeys.keys`.
 - **NFS**: `/data` and `/workspace` exported over NFS v3 and v4 to the LAN, per the client list in `~/nixos-private/nfs-clients.nix`. See [NFS](#nfs).
 - **SSH**: `openssh` enabled with password authentication disabled, so key-based login only.
+- **Tailscale**: `tailscaled` running, so SSH and NFS are also reachable over the tailnet. See [Tailscale](#tailscale).
 - **mDNS**: `avahi` publishing addresses, so the box is reachable as `server.local`.
 - **Nix**: `nix-command` and `flakes` experimental features enabled.
 
@@ -207,6 +208,52 @@ Check what is exported, and who is connected:
 sudo exportfs -v
 sudo ss -tnp 'sport = :2049'
 ```
+
+## Tailscale
+
+`services.tailscale` runs `tailscaled`, and `openFirewall` opens UDP 41641 so
+peers can reach the server directly instead of through a DERP relay. Nothing
+else changes in the firewall: SSH (22) and the NFS ports are already open on
+every interface, `tailscale0` included.
+
+Join the tailnet once after the first rebuild. The login is kept in
+`/var/lib/tailscale`, so it survives reboots and rebuilds:
+
+```bash
+sudo tailscale up
+tailscale ip -4            # the server's 100.x address
+```
+
+Then, in the Tailscale admin console, **disable key expiry** for this machine,
+or it drops off the tailnet when its key expires (180 days by default).
+
+**SSH** is the normal OpenSSH server, reached at the tailnet address or the
+MagicDNS name (`ssh julien@server`, or whatever name the admin console shows).
+Tailscale SSH (`tailscale up --ssh`) is not used, so the usual key-only login
+applies.
+
+**NFS** authorises clients by source address, and over the tailnet that source
+is the client's own 100.x address, not its LAN one. Add that address to the
+export lists in `~/nixos-private/nfs-clients.nix`, then rebuild:
+
+```nix
+rw = [
+  "192.168.1.50" # some-client, on the LAN
+  "100.101.102.103" # some-client, over Tailscale
+];
+```
+
+Tailscale addresses are stable per machine, so they suit `rw` better than DHCP
+leases do. Listing the whole tailnet range, `100.64.0.0/10`, would admit every
+device on it. Mount with the same options as on the LAN, swapping the host:
+
+```bash
+sudo mount -t nfs -o vers=3,resvport,soft,timeo=30,retrans=3,nobrowse \
+  100.101.102.103:/workspace /System/Volumes/Data/mnt/workspace
+```
+
+Use the server's 100.x address (or its MagicDNS name) here, not `server.local`:
+mDNS does not cross the tailnet.
 
 ## Updating
 

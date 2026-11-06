@@ -11,6 +11,9 @@
 # (192.168.1.0/24), or a hostname the server can resolve back from the client's
 # address. Plain addresses are the reliable choice on a home LAN.
 #
+# A client mounting over Tailscale arrives from its 100.x tailnet address, not
+# its LAN one, so list that too (`tailscale ip -4` on the client shows it).
+#
 #   rw  read and write. The client is mapped to julien (UID 1000) on the
 #       server whatever user ID it sends, so macOS clients (UID 501) work.
 #   ro  read only.
@@ -24,6 +27,7 @@
   data = {
     rw = [
       "192.168.1.50" # some-client
+      "100.101.102.103" # some-client, over Tailscale
     ];
     ro = [ ];
   };
