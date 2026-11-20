@@ -52,6 +52,17 @@ if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
   exit 1
 fi
 
+# Ask for the password once, up front, and keep sudo's cached credentials fresh
+# in the background: the rebuild can outlast sudo's 5-minute timeout, and the
+# disk cleanup after it would otherwise prompt a second time.
+sudo -v
+while sleep 60; do
+  kill -0 "$$" 2>/dev/null || exit
+  sudo -n -v 2>/dev/null
+done &
+SUDO_KEEPALIVE=$!
+trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
+
 echo "==> Updating inputs: ${*:-all}"
 nix flake update "$@"
 
