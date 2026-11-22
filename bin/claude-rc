@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Run a `claude remote-control` server in the background.
+#
+# Usage: claude-rc {start|stop|restart|status|log} [extra claude remote-control args]
+#
+# Env overrides:
+#   CLAUDE_RC_DIR   directory the server works in   (default: /workspace)
+#   CLAUDE_RC_STATE where pid file and log live     (default: ~/.local/state/claude-rc)
+set -euo pipefail
+
+RC_DIR="${CLAUDE_RC_DIR:-/workspace}"
+STATE_DIR="${CLAUDE_RC_STATE:-$HOME/.local/state/claude-rc}"
+PID_FILE="$STATE_DIR/claude-rc.pid"
+LOG_FILE="$STATE_DIR/claude-rc.log"
+
+mkdir -p "$STATE_DIR"
+
+is_running() {
+    [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+}
+
+start() {
+    if is_running; then
+        echo "claude-rc already running (pid $(cat "$PID_FILE"))"
+        return 0
+    fi
+    cd "$RC_DIR"
+    # remote-control expects a terminal: `script` gives it a pty, setsid detaches
+    # it from this shell so it survives logout / the SSH session closing.
+    local cmd
+    printf -v cmd '%q ' claude remote-control "$@"
+    setsid nohup script -qfec "$cmd" /dev/null </dev/null >>"$LOG_FILE" 2>&1 &
+    echo $! >"$PID_FILE"
+    sleep 3
+    if is_running; then
+        echo "claude-rc started (pid $(cat "$PID_FILE")) in $RC_DIR"
+        echo "log: $LOG_FILE"
+    else
+        echo "claude-rc failed to start, last log lines:" >&2
+        tail -n 20 "$LOG_FILE" >&2
+        rm -f "$PID_FILE"
+        return 1
+    fi
+}
+
+stop() {
+    if ! is_running; then
+        echo "claude-rc not running"
+        rm -f "$PID_FILE"
+        return 0
+    fi
+    local pid
+    pid="$(cat "$PID_FILE")"
+    # Kill the whole session group (script + claude + spawned sessions).
+    kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid"
+    for _ in {1..20}; do
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 0.5
+    done
+    kill -0 "$pid" 2>/dev/null && kill -KILL -- "-$pid" 2>/dev/null
+    rm -f "$PID_FILE"
+    echo "claude-rc stopped"
+}
+
+case "${1:-}" in
+    start)   shift; start "$@" ;;
+    stop)    stop ;;
+    restart) shift; stop; start "$@" ;;
+    status)
+        if is_running; then echo "running (pid $(cat "$PID_FILE"))"; else echo "stopped"; exit 1; fi ;;
+    log)     tail -n 50 -f "$LOG_FILE" ;;
+    *)       echo "usage: $(basename "$0") {start|stop|restart|status|log} [claude remote-control args]" >&2; exit 2 ;;
+esac

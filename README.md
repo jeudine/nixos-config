@@ -13,7 +13,8 @@ Flake-based NixOS configuration for a single headless machine: the host `server`
 | `flake.lock` | Pinned revisions of all inputs |
 | `update.sh` | Update inputs, rebuild, commit the new lock |
 | `install.sh` | Set up a machine: check prerequisites, rebuild, create the symlinks |
-| `workspace/CLAUDE.md` | Agent instructions for `/workspace`, symlinked there as `/workspace/CLAUDE.md` |
+| `workspace/AGENTS.md` | Agent instructions for `/workspace` (read by Claude Code and Codex), symlinked there as `/workspace/AGENTS.md` |
+| `bin/claude-rc` | Runs `claude remote-control` in the background (`start`/`stop`/`restart`/`status`/`log`), symlinked as `~/.local/bin/claude-rc` |
 
 ## What the system provides
 
@@ -51,7 +52,7 @@ identical to the repo copy, and otherwise renamed to `<name>.bak.<timestamp>`.
 Re-running is harmless. To add a link, add a `"link:target"` entry to `LINKS`, with the
 target relative to the repo.
 
-`/workspace/CLAUDE.md` points to `/home/julien/nixos-config/...`, and NFS clients
+`/workspace/AGENTS.md` points to `/home/julien/nixos-config/...`, and NFS clients
 resolve symlinks on their own side, so over NFS the link appears broken. It works
 on the server, where the agents run.
 

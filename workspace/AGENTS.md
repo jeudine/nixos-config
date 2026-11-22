@@ -5,11 +5,11 @@ git repository; `/workspace` itself is not. Agents are started from here and con
 remotely, so don't wait on interactive prompts and report clearly what you did.
 
 **At the start of every session**, look at all the repositories in `/workspace`: list the
-subdirectories and, for each one, check its README / CLAUDE.md, its remote (`git remote -v`),
+subdirectories and, for each one, check its README / AGENTS.md / CLAUDE.md, its remote (`git remote -v`),
 current branch and status (`git status`). Don't rely on a hardcoded project list; projects are
 added over time. Ignore `._*` AppleDouble files.
 
-Before working on a project, `cd` into it and read its own README / CLAUDE.md if present.
+Before working on a project, `cd` into it and read its own README / AGENTS.md / CLAUDE.md if present.
 
 ## Git rules (apply to every project)
 

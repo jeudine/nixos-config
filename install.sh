@@ -16,7 +16,8 @@ NFS_CLIENTS="$HOME/nixos-private/nfs-clients.nix"
 
 # Symlinks to create, as "link:target" with the target relative to the repo.
 LINKS=(
-  "/workspace/CLAUDE.md:workspace/CLAUDE.md"
+  "/workspace/AGENTS.md:workspace/AGENTS.md"
+  "$HOME/.local/bin/claude-rc:bin/claude-rc"
 )
 
 REBUILD=1
