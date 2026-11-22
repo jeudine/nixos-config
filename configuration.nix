@@ -158,12 +158,13 @@ in
     poppler-utils
     pandoc
     texliveFull
+    tectonic
     gnumake
     pkg-config
     alsa-lib
   ]
     ++ [
-      inputs.claude-code.packages.${pkgs.system}.default
+      inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
   # marp-cli looks for a Chrome binary; point it at the Nix one explicitly.
