@@ -89,7 +89,7 @@ in
 
   users.users.julien = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "plugdev" "dialout" ];
+    extraGroups = [ "wheel" "plugdev" "dialout" "audio" ];
   };
 
   # Debug probes (STLink etc.) for probe-rs. Its udev rules give the device to
